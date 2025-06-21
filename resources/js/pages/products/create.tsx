@@ -38,6 +38,11 @@ export default function Create() {
                             value={data.name}
                             onChange={e => setData('name', e.target.value)}
                         ></Input>
+                        {errors.name && (
+                            <div className='flex items-center text-red-500 text-sm mt-1'>
+                                {errors.name}
+                            </div>
+                        )}
                     </div>
                     <div className='gap-1.5'>
                         <Input
@@ -45,6 +50,11 @@ export default function Create() {
                             value={data.stock}
                             onChange={e => setData('stock', e.target.value)}
                         ></Input>
+                        {errors.stock && (
+                            <div className='flex items-center text-red-500 text-sm mt-1'>
+                                {errors.stock}
+                            </div>
+                        )}
                     </div>
                     <div className='gap-1.5'>
                         <Input
@@ -52,6 +62,11 @@ export default function Create() {
                             value={data.price}
                             onChange={e => setData('price', e.target.value)}
                         ></Input>
+                        {errors.price && (
+                            <div className='flex items-center text-red-500 text-sm mt-1'>
+                                {errors.price}
+                            </div>
+                        )}
                     </div>
                     <div className='gap-1.5'>
                         <Textarea 
@@ -59,6 +74,11 @@ export default function Create() {
                             value={data.description}
                             onChange={e => setData('description', e.target.value)} 
                         />
+                        {errors.description && (
+                            <div className='flex items-center text-red-500 text-sm mt-1'>
+                                {errors.description}
+                            </div>
+                        )}
                     </div>
                     <Button type='submit'>
                         Create Product
