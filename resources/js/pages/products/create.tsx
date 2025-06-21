@@ -80,7 +80,7 @@ export default function Create() {
                             </div>
                         )}
                     </div>
-                    <Button type='submit'>
+                    <Button disabled={processing} type='submit'>
                         Create Product
                     </Button>
                 </form>

@@ -88,7 +88,7 @@ export default function Edit({product}: {product: Product}) {
                             </div>
                         )}
                     </div>
-                    <Button type='submit'>
+                    <Button disabled={processing} type='submit'>
                         Update Product
                     </Button>
                 </form>
