@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from '@/components/ui/button';
+import Pagination from '@/components/pagination';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -27,7 +28,18 @@ interface Product {
     price: number
 }
 
-export default function Index({products}: {products: Product[]}) {
+interface Link {
+  active: boolean,
+  label: string,
+  url: string
+}
+
+interface ProductsPaginated {
+    data: Product[];
+    links: Link[];
+}
+
+export default function Index({products}: {products: ProductsPaginated}) {
 
     const {processing, delete: destroy} = useForm();
 
@@ -46,7 +58,7 @@ export default function Index({products}: {products: Product[]}) {
                         Create Product
                     </Button>
                 </Link>
-                {products.length > 0 && (
+                {products.data.length > 0 && (
                     <Table>
                         <TableCaption>A list of your recent invoices.</TableCaption>
                         <TableHeader>
@@ -60,7 +72,7 @@ export default function Index({products}: {products: Product[]}) {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {products.map((product) => (
+                            {products.data.map((product) => (
                                 <TableRow key={product.id}>
                                     <TableCell className="font-medium">{product.id}</TableCell>
                                     <TableCell>{product.name}</TableCell>
@@ -82,6 +94,9 @@ export default function Index({products}: {products: Product[]}) {
                         </TableBody>
                     </Table>
                 )}
+                <div className='my-2'>
+                    <Pagination links={products.links} />
+                </div>
             </div>
         </AppLayout>
     );
