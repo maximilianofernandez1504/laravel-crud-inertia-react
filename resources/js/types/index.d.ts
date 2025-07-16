@@ -40,3 +40,17 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+interface Url {
+  active: boolean,
+  label: string,
+  url: string
+}
+
+interface Product {
+    id: number;
+    name: string;
+    description: string;
+    stock: number;
+    price: number
+}

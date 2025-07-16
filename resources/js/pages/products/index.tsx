@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem, Url, Product } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import {
   Table,
@@ -20,23 +20,9 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-interface Product {
-    id: number;
-    name: string;
-    description: string;
-    stock: number;
-    price: number
-}
-
-interface Link {
-  active: boolean,
-  label: string,
-  url: string
-}
-
 interface ProductsPaginated {
     data: Product[];
-    links: Link[];
+    links: Url[];
 }
 
 export default function Index({products}: {products: ProductsPaginated}) {

@@ -1,12 +1,7 @@
+import { Url } from "@/types";
 import { Link } from "@inertiajs/react";
 
-interface Link {
-  active: boolean,
-  label: string,
-  url: string
-}
-
-export default function Pagination({links}: {links: Link[]}) {
+export default function Pagination({links}: {links: Url[]}) {
     return (
         <div className='flex flex-wrap justify-center items-center gap-1'>
             {links.map((link, index) => (
