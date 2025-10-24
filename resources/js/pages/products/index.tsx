@@ -1,18 +1,26 @@
+import { useState } from "react";
+import { Link, usePage } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, Url, Product } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { type BreadcrumbItem } from '@/types';
 import { Button } from '@/components/ui/button';
-import Pagination from '@/components/pagination';
 
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  discount: number;
+}
+
+interface PaginatedProducts {
+  data: Product[];
+  next_page_url: string | null;
+  prev_page_url: string | null;
+}
+
+interface PageProps {
+  products: PaginatedProducts;
+}
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Products',
@@ -20,70 +28,62 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-interface ProductsPaginated {
-    data: Product[];
-    links: Url[];
-}
+export default function Index() {
+  const { products } = usePage<PageProps>().props;
+  const [visibleProducts, setVisibleProducts] = useState(products.data);
+  const [nextPage, setNextPage] = useState(products.next_page_url);
 
-export default function Index({products}: {products: ProductsPaginated}) {
+  const loadMore= () => {
+  if (!nextPage) return;
 
-    const {processing, delete: destroy} = useForm();
+  router.get(nextPage, {}, {
+      preserveScroll: true,
+      preserveState: true,
+      only: ['products'],
+      onSuccess: (page) => {
+        const newProducts = (page.props.products as PaginatedProducts);
+        setVisibleProducts((prev) => [...prev, ...newProducts.data]);
+        setNextPage(newProducts.next_page_url);
+      }
+    });
+  };
 
-    const handleDelete = (id: number) => {
-        if (confirm('Are you sure you want to delete this product')) {
-            destroy(route('products.destroy', id))
-        }
-    }
-
-    return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Products | List" />
-            <div className='m-4'>
-                <Link href={route('products.create')}>
-                    <Button className='mb-4'>
-                        Create Product
-                    </Button>
-                </Link>
-                {products.data.length > 0 && (
-                    <Table>
-                        <TableCaption>A list of your recent invoices.</TableCaption>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-[100px]">ID</TableHead>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Description</TableHead>
-                                <TableHead>Stock</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {products.data.map((product) => (
-                                <TableRow key={product.id}>
-                                    <TableCell className="font-medium">{product.id}</TableCell>
-                                    <TableCell>{product.name}</TableCell>
-                                    <TableCell>{product.description}</TableCell>
-                                    <TableCell>{product.stock}</TableCell>
-                                    <TableCell>{product.price}</TableCell>
-                                    <TableCell className="text-right space-x-2">
-                                        <Link href={route('products.edit', product.id)}>
-                                            <Button className='bg-slate-500 hover:bg-slate-700'>Edit</Button>
-                                        </Link>
-                                        <Button
-                                            disabled={processing}
-                                            className='bg-red-500 hover:bg-red-700'
-                                            onClick={() => handleDelete(product.id)}
-                                        >Delete</Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                )}
-                <div className='my-2'>
-                    <Pagination links={products.links} />
-                </div>
+  return (
+    <AppLayout breadcrumbs={breadcrumbs}>
+    <div>
+      <Link href={route('products.create')}>
+          <Button className='mb-4'>
+              Create Product
+          </Button>
+      </Link>
+    </div>
+    <div className="p-6">
+      <div className="grid grid-cols-4 gap-4">
+        {visibleProducts.map((p) => (
+          <div
+            key={p.id}
+            className="border p-3 rounded-lg shadow hover:scale-105 transition"
+          >
+            <div className="text-sm text-yellow-600 font-bold">
             </div>
-        </AppLayout>
-    );
+            <h3 className="font-bold">{p.name}</h3>
+            <p className="text-gray-700">${p.price.toLocaleString()}</p>
+           
+          </div>
+        ))}
+      </div>
+
+      {nextPage && (
+        <div className="flex justify-center mt-6">
+          <button
+            onClick={loadMore}
+            className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-6 rounded-full"
+          >
+            ↓
+          </button>
+        </div>
+      )}
+    </div>
+    </AppLayout>
+  );
 }
