@@ -9,7 +9,7 @@ interface Product {
   id: number;
   name: string;
   price: number;
-  discount: number;
+  description: Text;
 }
 
 interface PaginatedProducts {
@@ -60,15 +60,16 @@ export default function Index() {
     <div className="p-6">
       <div className="grid grid-cols-4 gap-4">
         {visibleProducts.map((p) => (
-          <div
+          
+          <div 
             key={p.id}
-            className="border p-3 rounded-lg shadow hover:scale-105 transition"
-          >
-            <div className="text-sm text-yellow-600 font-bold">
-            </div>
-            <h3 className="font-bold">{p.name}</h3>
+            className="border p-3 rounded-lg shadow hover:scale-105 transition">
+          <Link href={route('products.show', p.id)}>
+              <div className="text-sm text-yellow-600 font-bold">
+              </div>
+              <h3 className="font-bold">{p.name}</h3>
             <p className="text-gray-700">${p.price.toLocaleString()}</p>
-           
+            </Link>
           </div>
         ))}
       </div>
@@ -79,7 +80,7 @@ export default function Index() {
             onClick={loadMore}
             className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-6 rounded-full"
           >
-            ↓
+            V
           </button>
         </div>
       )}
