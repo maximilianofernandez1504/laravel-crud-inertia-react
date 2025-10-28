@@ -1,6 +1,11 @@
 <?php
 
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductImageController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -19,13 +24,46 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('products/{product}',[ProductController::class,'show'])->name('products.show');
     Route::post('products', [ProductController::class, 'store'])->name('products.store');
     Route::get('products/edit/{product}', [ProductController::class, 'edit'])->name('products.edit');
-    Route::put('products/{product}', [ProductController::class, 'update'])->name('products.update');
+    Route::post('products/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+    Route::patch('/products/{product}/restore', [ProductController::class, 'restore'])->name('products.restore');
     
+    //Permisions routes
+    Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
+    Route::post('permissions', [PermissionController::class, 'store'])->name('permissions.store');
+    Route::put('permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update');
+    Route::delete('permissions/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
+    
+
+    //Roles routes
+    Route::get('roles', [RoleController::class, 'index'])->name('roles.index');
+    Route::get('roles/create', [RoleController::class, 'create'])->name('roles.create');
+    Route::post('roles', [RoleController::class, 'store'])->name('roles.store');
+    Route::get('roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
+    Route::put('roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+    Route::delete('roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+
     //Imagenes de productos
     Route::get('products/{product}/images', [ProductImageController::class, 'index'])->name('products.images.index');
     Route::post('products/images', [ProductImageController::class, 'store'])->name('products.images.store');
     Route::delete('products/images/{id}', [ProductImageController::class, 'destroy'])->name('products.images.destroy');
+    Route::delete('/products/{product}/images/{image}', [ProductController::class, 'deleteImage'])->name('products.deleteImage');
+
+    //Categorias
+    Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::get('categories/create', [CategoryController::class, 'create'])->name('categories.create');
+    Route::post('categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::get('categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
+    Route::put('categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
+    Route::get('users', [UserController::class, 'index'])->name('users.index');
+    Route::get('users/create', [UserController::class, 'create'])->name('users.create');
+    Route::post('users', [UserController::class, 'store'])->name('users.store');
+    Route::get('users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+
 });
 
 

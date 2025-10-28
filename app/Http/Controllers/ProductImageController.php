@@ -11,7 +11,7 @@ class ProductImageController extends Controller
     //
     public function index($productId)
     {
-        $images = ProductImage::where('product_id', $productId)->get();
+        $images = ProductImage::where('product_id', $productId)->orderby('priority','ASC')->get();
         return response()->json($images);
     }
 
@@ -32,10 +32,16 @@ class ProductImageController extends Controller
         $ruta= $archivo->storeAs('public/product', $nombreArchivo);
         
         $rutaPublica= 'storage/app/public/'.$nombreArchivo;
+        
+        $maxPriority = ProductImage::where('product_id', $request->input('product_id'))
+            ->max('priority');
+
+        $nextPriority = is_null($maxPriority) ? 0 : $maxPriority + 1;
+
         ProductImage::create([
             'product_id' => $request->input('product_id'),
             'image_path' => $rutaPublica,
-            'state' => 1,
+            'priority' => $nextPriority,
         ]);
         return response()->json([
             'message' => 'Imagen subida correctamente',
