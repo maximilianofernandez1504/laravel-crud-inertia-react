@@ -10,6 +10,9 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use App\Exports\ProductsExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 class ProductController extends Controller
 {
@@ -184,4 +187,12 @@ class ProductController extends Controller
 
         return back()->with('success', 'Imagen eliminada correctamente.');
     }
+
+      public function export() 
+    {
+        return Excel::download(new ProductsExport, 'products.xlsx');
+    }
+    
+
+    
 }

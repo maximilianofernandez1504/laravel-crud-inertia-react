@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { Link, usePage, router } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
@@ -87,6 +88,14 @@ export default function Index() {
         <Link href={route("products.create")}>
           <Button className="mb-4">Crear Producto</Button>
         </Link>
+        <Link href={route('products.export')}
+              className='ml-2'>
+              <Button className='mb-4'
+                  onClick={() => window.location.href="products/export/"}
+                  >
+                      Exportar Excel
+              </Button>
+          </Link>
       </div>
 
       

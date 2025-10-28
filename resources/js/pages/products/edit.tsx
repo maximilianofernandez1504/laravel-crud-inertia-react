@@ -62,10 +62,7 @@ export default function Edit({ product, categories }: { product: Product; catego
         : [...data.category_ids, id]
     );
   };
-  // const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-  //   const selected = Array.from(e.target.selectedOptions, (option) => Number(option.value));
-  //   setData('category_ids', selected);
-  // };
+  
   
 
   const handleUpdate = (e: React.FormEvent<HTMLFormElement>) => {

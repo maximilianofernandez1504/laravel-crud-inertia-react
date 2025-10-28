@@ -22,11 +22,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('products', [ProductController::class, 'index'])->name('products.index');
     Route::get('products/create', [ProductController::class, 'create'])->name('products.create');
     Route::get('products/{product}',[ProductController::class,'show'])->name('products.show');
-    Route::post('products', [ProductController::class, 'store'])->name('products.store');
+    Route::get('products/export/', [ProductController::class, 'export'])->name('products.export');
     Route::get('products/edit/{product}', [ProductController::class, 'edit'])->name('products.edit');
+    Route::post('products', [ProductController::class, 'store'])->name('products.store');
     Route::post('products/{product}', [ProductController::class, 'update'])->name('products.update');
-    Route::delete('products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
     Route::patch('/products/{product}/restore', [ProductController::class, 'restore'])->name('products.restore');
+    Route::delete('products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+    
+    
     
     //Permisions routes
     Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
@@ -38,8 +41,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //Roles routes
     Route::get('roles', [RoleController::class, 'index'])->name('roles.index');
     Route::get('roles/create', [RoleController::class, 'create'])->name('roles.create');
-    Route::post('roles', [RoleController::class, 'store'])->name('roles.store');
     Route::get('roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
+    Route::post('roles', [RoleController::class, 'store'])->name('roles.store');
     Route::put('roles/{role}', [RoleController::class, 'update'])->name('roles.update');
     Route::delete('roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
 
@@ -52,15 +55,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //Categorias
     Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
     Route::get('categories/create', [CategoryController::class, 'create'])->name('categories.create');
+     Route::get('categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
     Route::post('categories', [CategoryController::class, 'store'])->name('categories.store');
-    Route::get('categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
     Route::put('categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
     Route::get('users', [UserController::class, 'index'])->name('users.index');
     Route::get('users/create', [UserController::class, 'create'])->name('users.create');
-    Route::post('users', [UserController::class, 'store'])->name('users.store');
     Route::get('users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::post('users', [UserController::class, 'store'])->name('users.store');
     Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
