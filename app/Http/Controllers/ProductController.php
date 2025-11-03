@@ -10,7 +10,7 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
-use App\Exports\ProductsExport;
+use App\Exports\ProductsExports;
 use Maatwebsite\Excel\Facades\Excel;
 
 
@@ -18,6 +18,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {   
+       
         $categories = Category::all(); 
         if ($request->query('all') === 'true') {
             $products = Product::with('categories', 'images')->paginate(12);
@@ -188,9 +189,10 @@ class ProductController extends Controller
         return back()->with('success', 'Imagen eliminada correctamente.');
     }
 
-      public function export() 
+    public function exportExcel() 
     {
-        return Excel::download(new ProductsExport, 'products.xlsx');
+        error_log('llegue al exportExcel');
+        return Excel::download(new ProductsExports, 'products.xlsx');
     }
     
 

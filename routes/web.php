@@ -19,11 +19,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     // Products
-    Route::get('products', [ProductController::class, 'index'])->name('products.index');
+    //Route::get('products', [ProductController::class, 'index'])->name('products.index');
     Route::get('products/create', [ProductController::class, 'create'])->name('products.create');
     Route::get('products/{product}',[ProductController::class,'show'])->name('products.show');
-    Route::get('products/export/', [ProductController::class, 'export'])->name('products.export');
+    Route::get('products/export', [ProductController::class, 'export'])->name('products.export');
+    Route::get('products/exportExcel', [ProductController::class, 'index'])->name('products.exportExcel');
     Route::get('products/edit/{product}', [ProductController::class, 'edit'])->name('products.edit');
+    Route::get('products/report/{product}', [ProductController::class,'productReport'])->name('product.report');
     Route::post('products', [ProductController::class, 'store'])->name('products.store');
     Route::post('products/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::patch('/products/{product}/restore', [ProductController::class, 'restore'])->name('products.restore');

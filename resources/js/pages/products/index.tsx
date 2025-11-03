@@ -88,14 +88,12 @@ export default function Index() {
         <Link href={route("products.create")}>
           <Button className="mb-4">Crear Producto</Button>
         </Link>
-        <Link href={route('products.export')}
-              className='ml-2'>
-              <Button className='mb-4'
-                  onClick={() => window.location.href="products/export/"}
-                  >
-                      Exportar Excel
-              </Button>
-          </Link>
+        <Button className='mb-4'
+            onClick={() => window.location.href="products/exportExcel"}
+            >
+                Exportar Excel
+        </Button>
+        
       </div>
 
       
