@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class OrderDetail extends Model
+{
+    use HasFactory;
+
+    protected $table = 'order_details';
+
+    protected $fillable = [
+        'order_id',
+        'product_id',
+        'variant_id',
+        'quantity',
+        'unit_price',
+        'subtotal',
+    ];
+
+    protected $casts = [
+        'quantity' => 'integer',
+        'unit_price' => 'decimal:2',
+        'subtotal' => 'decimal:2',
+    ];
+
+  
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+   
+    public function variant()
+    {
+        return $this->belongsTo(Variant::class, 'variant_id');
+    }
+
+    public function getCalculatedSubtotalAttribute()
+    {
+        return $this->quantity * $this->unit_price;
+    }
+}

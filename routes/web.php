@@ -3,9 +3,12 @@
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductImageController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\CheckoutController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -18,12 +21,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
+    
+
     // Products
-    //Route::get('products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('products', [ProductController::class, 'index'])->name('products.index');
     Route::get('products/create', [ProductController::class, 'create'])->name('products.create');
-    Route::get('products/{product}',[ProductController::class,'show'])->name('products.show');
     Route::get('products/export', [ProductController::class, 'export'])->name('products.export');
-    Route::get('products/exportExcel', [ProductController::class, 'index'])->name('products.exportExcel');
+    Route::get('products/{product}',[ProductController::class,'show'])->name('products.show');
     Route::get('products/edit/{product}', [ProductController::class, 'edit'])->name('products.edit');
     Route::get('products/report/{product}', [ProductController::class,'productReport'])->name('product.report');
     Route::post('products', [ProductController::class, 'store'])->name('products.store');
@@ -62,6 +66,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
+    //user
     Route::get('users', [UserController::class, 'index'])->name('users.index');
     Route::get('users/create', [UserController::class, 'create'])->name('users.create');
     Route::get('users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
@@ -69,6 +74,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
+    //Carrito
+    Route::get('cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::put('cart/{item}', [CartController::class, 'update'])->name('cart.update');
+    Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+    Route::delete('cart/{item}', [CartController::class, 'remove'])->name('cart.remove');
+    
+    //Gestion de venta
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+    Route::get('/checkout/thanks', [CheckoutController::class, 'thanks'])->name('checkout.thanks');
+    
+    //Gestion de Ordenes
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::get('/orders/{id}/edit', [OrderController::class, 'edit'])->name('orders.edit');
+    Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
 });
 
 
@@ -76,38 +98,3 @@ require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
 
 
-
-// use App\Http\Controllers\ProductController;
-// use App\Http\Controllers\ProductImageController;
-// use Illuminate\Support\Facades\Route;
-// use Inertia\Inertia;
-
-// Route::get('/', function () {
-//     return Inertia::render('welcome');
-// })->name('home');
-
-// Route::middleware(['auth', 'verified'])->group(function () {
-//     Route::get('dashboard', function () {
-//         return Inertia::render('dashboard');
-//     })->name('dashboard');
-
-//     // Products/Product Images
-//     Route::get('products', [ProductController::class, 'index'])->name('products.index');
-//     Route::get('products/create', [ProductController::class, 'create'])->name('products.create');
-//     Route::post('products', [ProductController::class, 'store'])->name('products.store');
-
-//     Route::get('products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
-//     Route::put('products/{product}', [ProductController::class, 'update'])->name('products.update');
-//     Route::delete('products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
-//     Route::patch('products/{product}/toggle-active', [ProductController::class, 'desable'])->name('products.toggleActive');
-
-//     Route::post('/product-images', [ProductImageController::class, 'store']);
-// });
-
-// // RUTA: servir archivos storage (fallback si el symlink o servidor fallan)
-// Route::get('/storage-file/{path}', [ProductController::class, 'serveImage'])
-//     ->where('path', '.*')
-//     ->name('storage.file');
-
-// require __DIR__.'/settings.php';
-// require __DIR__.'/auth.php';

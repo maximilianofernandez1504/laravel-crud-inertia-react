@@ -16,6 +16,7 @@ class Product extends Model
         'description',
         'stock',
         'price',
+        'product_type',
         'state',
     ];
 
@@ -29,7 +30,10 @@ class Product extends Model
       return $this->belongsToMany(Category::class, 'product_categories');
     }
 
-
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
 
 
 

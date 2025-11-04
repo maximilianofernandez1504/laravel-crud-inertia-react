@@ -4,7 +4,7 @@ import { Link, usePage, router } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from "@/types";
 import { Button } from "@/components/ui/button";
-import Carousel from "@/Components/Carousel";
+import Carousel from "@/components/carousel";
 import { Input } from "@/components/ui/input";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
@@ -89,7 +89,7 @@ export default function Index() {
           <Button className="mb-4">Crear Producto</Button>
         </Link>
         <Button className='mb-4'
-            onClick={() => window.location.href="products/exportExcel"}
+            onClick={() => window.location.href="/products/export"}
             >
                 Exportar Excel
         </Button>
@@ -115,7 +115,7 @@ export default function Index() {
         </Button>
       </div>
 
-      {/* 🧩 Filtros por categoría */}
+     
       {showCategoryFilters && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ">
           {categories.length > 0 ? (
@@ -150,13 +150,13 @@ export default function Index() {
                 key={p.id}
                 className="border p-3 rounded-lg shadow hover:scale-105 transition"
               >
+                
                 {p.images.length > 0 ? (
                   <Carousel
                     images={p.images}
-                    autoPlay={false} // 🔹 No se desliza solo
-                    enableLightbox={false} // 🔹 No se puede agrandar la imagen
-                    height="220px" // 🔹 Altura fija
-                  />
+                    autoPlay={false} 
+                    enableLightbox={false} 
+                    height="220px"                   />
                 ) : (
                   <img
                     src="http://localhost:5173/storage/app/public/products/default.png"

@@ -8,7 +8,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 
 
-class ProductsExport implements FromCollection, WithHeadings, WithColumnWidths
+class ProductsExports implements FromCollection, WithHeadings, WithColumnWidths
 {
     /**
     * @return \Illuminate\Support\Collection
@@ -42,6 +42,14 @@ class ProductsExport implements FromCollection, WithHeadings, WithColumnWidths
     public function collection()
     {
         
-        return Product::all();
+        return Product::select(['id',
+        'name',
+        'description',
+        'stock',
+        'price',
+        'state',
+        'created_at',
+        'updated_at',
+        ])->get();
     }
 }

@@ -12,7 +12,6 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         url: '/dashboard',
         icon: LayoutGrid,
-        permission: 'view dashboard'
     },
     {
         title: 'Products',
@@ -38,9 +37,19 @@ const mainNavItems: NavItem[] = [
     }
     ,
     {
-        title: 'Users',
+        title: 'Usuarios',
         url: '/users',
         icon: UsersRound
+    },
+    {
+        title: 'Carrito',
+        url: '/cart',
+        icon : UsersRound,
+    },
+    {
+        title: 'Ordenes',
+        url:'/orders',
+        icon:LockKeyhole,
     },
 ];
 
