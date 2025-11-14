@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\ProductVariant;
 
 class OrderDetail extends Model
 {
@@ -40,7 +41,7 @@ class OrderDetail extends Model
    
     public function variant()
     {
-        return $this->belongsTo(Variant::class, 'variant_id');
+        return $this->belongsTo(ProductVariant::class, 'variant_id');
     }
 
     public function getCalculatedSubtotalAttribute()

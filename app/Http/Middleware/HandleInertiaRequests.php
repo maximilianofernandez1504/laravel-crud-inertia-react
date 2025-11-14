@@ -43,16 +43,31 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
+
+            
             'auth' => [
                 'user' => $request->user(),
+                'permissions' => $request->user()
+                ? $request->user()->getAllPermissions()->pluck('name'): [],
             ],
-            'ziggy' => fn (): array => [
-                ...(new Ziggy)->toArray(),
+
+            'cartCount' => function () use ($request) {
+                if (!$request->user()) return 0;
+
+                return \App\Models\CartItem::whereHas('cart', function ($query) use ($request) {
+                    $query->where('user_id', $request->user()->id);
+                })->sum('quantity');
+            },
+
+            'ziggy' => fn(): array => [
+                ...(new \Tighten\Ziggy\Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
+
             'flash' => [
                 'message' => fn() => $request->session()->get('message')
             ],
         ];
     }
+
 }

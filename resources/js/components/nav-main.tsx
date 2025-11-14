@@ -8,7 +8,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
     //const {can} = usePermissions();
     return (
         <SidebarGroup className="px-2 py-0">
-            <SidebarGroupLabel>Platform</SidebarGroupLabel>
+            <SidebarGroupLabel>Menu</SidebarGroupLabel>
             <SidebarMenu>
                { items.map((item) => (
                    // can(item.permission) && (

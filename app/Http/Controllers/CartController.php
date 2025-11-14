@@ -11,15 +11,18 @@ use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
-  
-    public function index()
+   public function index()
     {
+        
+        $settings = \App\Models\SiteSetting::first();
+        $cartExpiration = $settings->cart_expiration_minutes ?? 10;
+
         $cart = Cart::where('user_id', auth()->id())
             ->with(['items.product', 'items.variant'])
             ->first();
 
-        
-        if ($cart && $cart->updated_at->diffInMinutes(now()) >= 10) {
+       
+        if ($cart && $cart->updated_at->diffInMinutes(now()) >= $cartExpiration) {
             $this->restoreStockAndEmptyCart($cart);
             $cart->delete();
             $cart = null;
@@ -35,11 +38,26 @@ class CartController extends Controller
 
         $total = $items->sum('subtotal');
 
+        $orders = \App\Models\Order::where('user_id', auth()->id())
+            ->with(['details.product', 'details.variant'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+        $orders->getCollection()->transform(function ($order) {
+            $order->items = $order->details;
+            return $order;
+        });
+
         return inertia('Cart/Index', [
             'cart' => $items,
             'total' => $total,
+            'orders' => $orders,
+            'cart_expiration' => $cartExpiration,
+            'cart_updated_at' => $cart?->updated_at?->toISOString(),
         ]);
     }
+
 
 
     public function add(Request $request)
@@ -63,14 +81,12 @@ class CartController extends Controller
 
         $cart = Cart::firstOrCreate(['user_id' => auth()->id()]);
 
-      
         $existingItem = $cart->items()
             ->where('product_id', $product->id)
             ->where('variant_id', $variant?->id)
             ->first();
 
         if ($existingItem) {
-         
             $newQty = $existingItem->quantity + $validated['quantity'];
             if ($newQty > $stock + $existingItem->quantity) {
                 return back()->with('flash', [
@@ -80,7 +96,6 @@ class CartController extends Controller
             }
             $existingItem->update(['quantity' => $newQty]);
         } else {
-           
             $cart->items()->create([
                 'product_id' => $product->id,
                 'variant_id' => $variant?->id,
@@ -89,9 +104,16 @@ class CartController extends Controller
             ]);
         }
 
-      
-        if ($variant) $variant->decrement('stock', $validated['quantity']);
-        else $product->decrement('stock', $validated['quantity']);
+        
+        if ($variant) {
+            $variant->decrement('stock', $validated['quantity']);
+
+            
+            $totalVariantStock = $product->variants()->sum('stock');
+            $product->update(['stock' => $totalVariantStock]);
+        } else {
+            $product->decrement('stock', $validated['quantity']);
+        }
 
         return back()->with('flash', [
             'status' => 'success',
@@ -99,7 +121,6 @@ class CartController extends Controller
         ]);
     }
 
-    
     public function update(Request $request, CartItem $item)
     {
         $request->validate(['quantity' => 'required|integer|min:0']);
@@ -115,7 +136,13 @@ class CartController extends Controller
         if ($newQty === 0) {
             if ($variant) $variant->increment('stock', $currentQty);
             else $product->increment('stock', $currentQty);
+
             $item->delete();
+
+            
+            if ($variant) {
+                $product->update(['stock' => $product->variants()->sum('stock')]);
+            }
 
             return back()->with('flash', [
                 'status' => 'success',
@@ -131,16 +158,23 @@ class CartController extends Controller
             ]);
         }
 
-
+       
         if ($difference > 0) {
-         
-            $variant ? $variant->decrement('stock', $difference) : $product->decrement('stock', $difference);
+            $variant
+                ? $variant->decrement('stock', $difference)
+                : $product->decrement('stock', $difference);
         } elseif ($difference < 0) {
-      
-            $variant ? $variant->increment('stock', abs($difference)) : $product->increment('stock', abs($difference));
+            $variant
+                ? $variant->increment('stock', abs($difference))
+                : $product->increment('stock', abs($difference));
         }
 
         $item->update(['quantity' => $newQty]);
+
+      
+        if ($variant) {
+            $product->update(['stock' => $product->variants()->sum('stock')]);
+        }
 
         return back()->with('flash', [
             'status' => 'success',
@@ -148,7 +182,6 @@ class CartController extends Controller
         ]);
     }
 
-    
     public function remove(CartItem $item)
     {
         $variant = $item->variant;
@@ -159,13 +192,17 @@ class CartController extends Controller
 
         $item->delete();
 
+        
+        if ($variant) {
+            $product->update(['stock' => $product->variants()->sum('stock')]);
+        }
+
         return back()->with('flash', [
             'status' => 'success',
             'message' => 'Producto eliminado del carrito.'
         ]);
     }
 
-    
     public function clear()
     {
         $cart = Cart::where('user_id', auth()->id())->first();
@@ -175,6 +212,14 @@ class CartController extends Controller
                 if ($item->variant) $item->variant->increment('stock', $item->quantity);
                 else $item->product->increment('stock', $item->quantity);
             }
+
+           
+            foreach ($cart->items as $item) {
+                if ($item->variant) {
+                    $item->product->update(['stock' => $item->product->variants()->sum('stock')]);
+                }
+            }
+
             $cart->items()->delete();
         }
 
@@ -184,13 +229,43 @@ class CartController extends Controller
         ]);
     }
 
-  
     private function restoreStockAndEmptyCart(Cart $cart)
     {
         foreach ($cart->items as $item) {
             if ($item->variant) $item->variant->increment('stock', $item->quantity);
             else $item->product->increment('stock', $item->quantity);
         }
+
+
+        foreach ($cart->items as $item) {
+            if ($item->variant) {
+                $item->product->update(['stock' => $item->product->variants()->sum('stock')]);
+            }
+        }
+
         $cart->items()->delete();
     }
+
+    
+    public function expire()
+    {
+        $cart = Cart::where('user_id', auth()->id())->first();
+
+        if ($cart) {
+            foreach ($cart->items as $item) {
+                if ($item->variant) {
+                    $item->variant->increment('stock', $item->quantity);
+                    $item->product->update(['stock' => $item->product->variants()->sum('stock')]);
+                } else {
+                    $item->product->increment('stock', $item->quantity);
+                }
+            }
+
+            $cart->items()->delete();
+            $cart->delete();
+        }
+
+        
+    }
+
 }

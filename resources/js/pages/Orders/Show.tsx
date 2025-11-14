@@ -10,15 +10,15 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 
-export default function Show({ order }: any) {
+
+export default function Show({ order }) {
   const { data, setData, put, processing } = useForm({
     paid: !!order.paid,
     status: order.status ?? "reserva",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     put(route("orders.update", order.id));
   };
@@ -27,71 +27,135 @@ export default function Show({ order }: any) {
     <AppLayout>
       <Head title={`Orden #${order.id}`} />
 
-      <div className="max-w-3xl mx-auto mt-8">
-        <Card className="bg-zinc-900 text-yellow-400 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-xl font-bold">
-              Detalles de la Orden #{order.id}
+      <div className="max-w-6xl mx-auto mt-8">
+        <Card className="bg-zinc-900 text-yellow-300 shadow-lg border border-yellow-700">
+          <CardHeader className="border-b border-yellow-700 pb-4">
+            <CardTitle className="text-center text-2xl font-bold text-yellow-400">
+              ORDEN DE COMPRA
             </CardTitle>
           </CardHeader>
 
-          <CardContent className="space-y-4">
-            {/* 🧾 Información general */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CardContent className="mt-4 space-y-6">
+
+            {/* ENCABEZADO */}
+            <div className="grid grid-cols-2 text-sm">
               <div>
+                <p className="font-bold text-yellow-400">VALQUIRIA</p>
+                <p>Productos artesanales</p>
+                <p>Argentina</p>
+              </div>
+
+              <div className="text-right">
                 <p>
-                  <strong>Cliente:</strong>{" "}
-                  {order.user?.name ?? "Desconocido"}
+                  <strong>N° Orden:</strong> {order.id}
+                </p>
+                <p>
+                  <strong>Fecha:</strong>{" "}
+                  {new Date(order.created_at).toLocaleString()}
+                </p>
+                <p>
+                  <strong>Método de pago:</strong>{" "}
+                  {order.payment_method || "-"}
+                </p>
+              </div>
+            </div>
+
+            {/* DATOS DEL CLIENTE */}
+            <div className="border-t border-yellow-800 pt-4">
+              <h3 className="text-yellow-400 font-bold mb-2">
+                Datos del Cliente
+              </h3>
+
+              <div className="grid grid-cols-2 text-sm">
+                <p>
+                  <strong>Nombre:</strong> {order.user?.name ?? "-"}
                 </p>
                 <p>
                   <strong>Email:</strong> {order.user?.email ?? "-"}
                 </p>
               </div>
-              <div>
-                <p>
-                  <strong>Fecha:</strong>{" "}
-                  {order.created_at
-                    ? new Date(order.created_at).toLocaleString()
-                    : "-"}
-                </p>
-                <p>
-                  <strong>Método de pago:</strong>{" "}
-                  {order.payment_method ?? "No especificado"}
-                </p>
-              </div>
             </div>
 
-            {/* 💰 Totales */}
-            <div className="border-t border-yellow-800 pt-4 space-y-1">
+            {/* DETALLE DE PRODUCTOS */}
+            <div className="border-t border-yellow-800 pt-4">
+              <h3 className="text-yellow-400 font-bold mb-2">
+                Detalle de Productos
+              </h3>
+
+              {order.items?.length ? (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-yellow-700">
+                      <th className="pb-2 text-left">Producto</th>
+                      <th className="pb-2 text-left">Variante</th>
+                      <th className="pb-2 text-left">Cant.</th>
+                      <th className="pb-2 text-left">Precio</th>
+                      <th className="pb-2 text-right">Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {order.items.map((item) => (
+                      <tr key={item.id} className="border-b border-yellow-800">
+                        <td className="py-2">{item.product?.name}</td>
+                        <td className="py-2">
+                          {item.variant?.name ?? "-"}
+                        </td>
+                        <td className="py-2">{item.quantity}</td>
+                        <td className="py-2">${item.unit_price}</td>
+                        <td className="py-2 text-right">
+                          ${item.subtotal}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p>No hay productos.</p>
+              )}
+            </div>
+
+            {/* TOTALES */}
+            <div className="border-t border-yellow-800 pt-4 text-right space-y-1 text-sm">
               <p>
-                <strong>Subtotal:</strong> ${Number(order.total).toFixed(2)}
+                <strong>Subtotal:</strong> ${order.total}
               </p>
               <p>
-                <strong>Interés:</strong> ${Number(order.interest).toFixed(2)}
+                <strong>Interés:</strong> ${order.interest}
               </p>
-              <p className="text-yellow-300 font-semibold">
-                <strong>Total Final:</strong> $
-                {Number(order.final_total).toFixed(2)}
+              <p className="text-yellow-400 font-bold text-lg">
+                Total Final: ${order.final_total}
               </p>
             </div>
 
-            {/* 🛠️ Formulario de edición */}
-            <form onSubmit={handleSubmit} className="space-y-6 mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
-                {/* Estado */}
+            {/* FORMULARIO DE EDICIÓN */}
+            <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+
+              <div className="grid grid-cols-2 gap-6 items-center">
+
+                {/* PAGO */}
                 <div>
-                  <label
-                    htmlFor="status"
-                    className="block text-sm font-medium mb-2"
-                  >
-                    Estado:
+                  <label className="block text-sm font-medium mb-2">
+                    Pago realizado:
                   </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={data.paid}
+                      onChange={(e) => setData("paid", e.target.checked)}
+                      className="h-5 w-5 accent-yellow-500 cursor-pointer"
+                    />
+                    <span>{data.paid ? "Pagado" : "Pendiente"}</span>
+                  </div>
+                </div>
+                {/* ESTADO */}
+                <div>
+                  <p className="mb-2 font-semibold">Estado:</p>
                   <Select
                     value={data.status}
                     onValueChange={(value) => setData("status", value)}
                   >
-                    <SelectTrigger className="w-full bg-zinc-800 text-yellow-200">
-                      <SelectValue placeholder="Seleccionar estado" />
+                    <SelectTrigger className="bg-zinc-800 text-yellow-200">
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-zinc-800 text-yellow-200">
                       <SelectItem value="cancelado">Cancelado</SelectItem>
@@ -103,32 +167,19 @@ export default function Show({ order }: any) {
                   </Select>
                 </div>
 
-                {/* Pago */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Pago realizado:
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <Switch
-                      checked={data.paid}
-                      onCheckedChange={(checked: boolean) =>
-                        setData("paid", checked)
-                      }
-                    />
-                    <span>{data.paid ? "Pagado" : "Pendiente"}</span>
-                  </div>
-                </div>
               </div>
 
-              {/* Botones */}
+              {/* BOTONES */}
+              
               <div className="flex gap-3">
                 <Button
                   type="submit"
                   disabled={processing}
                   className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
                 >
-                  {processing ? "Guardando..." : "Guardar cambios"}
+                  Guardar cambios
                 </Button>
+
                 <Button
                   type="button"
                   variant="outline"
@@ -137,52 +188,16 @@ export default function Show({ order }: any) {
                 >
                   Volver
                 </Button>
+                <Button
+                type="button"
+                variant="outline"
+                className="border-yellow-700 text-yellow-300"
+                onClick={() => window.open(route('orders.exportPdf', order.id), '_blank')}
+                >
+                  Exportar PDF
+                </Button>
               </div>
             </form>
-
-            {/* 🧩 Productos */}
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold mb-2">Productos</h3>
-
-              {order.items && order.items.length > 0 ? (
-                <table className="w-full text-sm text-yellow-200">
-                  <thead>
-                    <tr className="border-b border-yellow-800">
-                      <th className="py-2 text-left">Producto</th>
-                      <th className="py-2 text-left">Precio</th>
-                      <th className="py-2 text-left">Cantidad</th>
-                      <th className="py-2 text-left">Variante</th>
-                      <th className="py-2 text-right">Subtotal</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {order.items.map((item: any) => (
-                      <tr key={item.id} className="border-b border-yellow-800">
-                        <td className="py-2">{item.product?.name ?? "—"}</td>
-                        <td className="py-2">
-                          ${Number(item.price ?? 0).toFixed(2)}
-                        </td>
-                        <td className="py-2">{item.quantity}</td>
-                        <td className="py-2">
-                          {item.variant?.name ?? item.variant_id ?? "-"}
-                        </td>
-                        <td className="py-2 text-right">
-                          $
-                          {Number(
-                            item.subtotal ??
-                              item.quantity * Number(item.price ?? 0)
-                          ).toFixed(2)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <p className="text-yellow-400">
-                  No hay productos en esta orden.
-                </p>
-              )}
-            </div>
           </CardContent>
         </Card>
       </div>

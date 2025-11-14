@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
 
 interface CarouselProps {
-  images: { image_path: string }[]; 
+  images: { image_path: string }[];
   autoPlay?: boolean;
   interval?: number;
   pauseOnHover?: boolean;
   enableLightbox?: boolean;
   height?: string;
+
+  // Opciones nuevas
+  fitMode?: "cover" | "contain"; // cómo ajustar la imagen
+  fullWidth?: boolean; // si ocupa todo el ancho de la pantalla
 }
 
 const Carousel: React.FC<CarouselProps> = ({
@@ -16,24 +20,23 @@ const Carousel: React.FC<CarouselProps> = ({
   pauseOnHover = true,
   enableLightbox = true,
   height = "h-64",
+
+  fitMode = "cover", // "cover" = como lo tenías antes
+  fullWidth = false, // false = como estaba antes
 }) => {
-    const [currentIndex, setCurrentIndex] = useState<number>(0);
-    const [isPaused, setIsPaused] = useState<boolean>(false);
-    const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
 
-  const next = () =>
-    setCurrentIndex((prev) => (prev + 1) % images.length);
-
+  const next = () => setCurrentIndex((prev) => (prev + 1) % images.length);
   const prev = () =>
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
 
- 
   useEffect(() => {
     if (!autoPlay || isPaused) return;
     const timer = setInterval(next, interval);
     return () => clearInterval(timer);
   }, [autoPlay, isPaused, interval, currentIndex]);
-
 
   if (images.length === 0) {
     return <p className="text-center text-gray-500">Sin imágenes disponibles</p>;
@@ -41,7 +44,9 @@ const Carousel: React.FC<CarouselProps> = ({
 
   return (
     <div
-      className="relative w-full max-w-3xl mx-auto overflow-hidden rounded-2xl shadow-lg"
+      className={`relative w-full ${
+        fullWidth ? "" : "max-w-3xl mx-auto rounded-2xl shadow-lg"
+      } overflow-hidden`}
       onMouseEnter={() => pauseOnHover && setIsPaused(true)}
       onMouseLeave={() => pauseOnHover && setIsPaused(false)}
     >
@@ -51,30 +56,28 @@ const Carousel: React.FC<CarouselProps> = ({
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
         {images.map((img, i) => (
-            <img
-                key={i}
-                src={`http://localhost:5173/${img.image_path}`}
-                className="w-full flex-shrink-0 object-cover h-64 sm:h-80 md:h-[400px] lg:h-[500px]"
-                alt={`Imagen ${i + 1}`}
-                onClick={() => enableLightbox && setIsLightboxOpen(true)} 
-            />
-            )
-          )
-        }
+          <img
+            key={i}
+            src={`http://localhost:5173/${img.image_path}`}
+            className={`w-full flex-shrink-0 ${height} object-${fitMode}`}
+            alt={`Imagen ${i + 1}`}
+            onClick={() => enableLightbox && setIsLightboxOpen(true)}
+          />
+        ))}
       </div>
 
-      {/* Botones */}
+      {/* Botón Anterior */}
       <button
         onClick={prev}
-        className="absolute top-1/2 left-3 transform -translate-y-1/2 bg-gray-800/50 text-white p-2 rounded-full hover:bg-gray-800"
-        aria-label="Anterior"
+        className="absolute top-1/2 left-3 transform -translate-y-1/2 bg-yellow-500/80 text-black font-bold p-2 rounded-full hover:bg-yellow-400 transition"
       >
         ❮
       </button>
+
+      {/* Botón Siguiente */}
       <button
         onClick={next}
-        className="absolute top-1/2 right-3 transform -translate-y-1/2 bg-gray-800/50 text-white p-2 rounded-full hover:bg-gray-800"
-        aria-label="Siguiente"
+        className="absolute top-1/2 right-3 transform -translate-y-1/2 bg-yellow-500/80 text-black font-bold p-2 rounded-full hover:bg-yellow-400 transition"
       >
         ❯
       </button>
@@ -86,7 +89,7 @@ const Carousel: React.FC<CarouselProps> = ({
             key={i}
             onClick={() => setCurrentIndex(i)}
             className={`w-3 h-3 rounded-full transition-colors duration-300 ${
-              i === currentIndex ? "bg-white" : "bg-gray-400"
+              i === currentIndex ? "bg-yellow-400" : "bg-yellow-700"
             }`}
           />
         ))}
@@ -95,14 +98,16 @@ const Carousel: React.FC<CarouselProps> = ({
       {/* Lightbox */}
       {enableLightbox && isLightboxOpen && (
         <div
-          className="fixed inset-0 bg-black/90 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 cursor-pointer"
           onClick={() => setIsLightboxOpen(false)}
         >
-          <img
-            src={`http://localhost:5173/${images[currentIndex].image_path}`}
-            alt="Imagen ampliada"
-            className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg shadow-lg"
-          />
+          <div className="flex items-center justify-center w-[90vw] h-[90vh]">
+            <img
+              src={`http://localhost:5173/${images[currentIndex].image_path}`}
+              alt="Imagen ampliada"
+              className="w-full h-full object-contain rounded-xl shadow-2xl border border-black"
+            />
+          </div>
         </div>
       )}
     </div>

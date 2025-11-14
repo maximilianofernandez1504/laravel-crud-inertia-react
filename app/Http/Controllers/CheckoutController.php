@@ -12,15 +12,12 @@ use Inertia\Inertia;
 
 class CheckoutController extends Controller
 {
-
     public function index()
     {
-        
         $cart = Cart::where('user_id', auth()->id())
             ->with(['items.product', 'items.variant'])
             ->first();
 
-        
         if (!$cart || $cart->items->isEmpty()) {
             return redirect()->route('cart.index')->with('flash', [
                 'status' => 'error',
@@ -28,7 +25,6 @@ class CheckoutController extends Controller
             ]);
         }
 
-        
         $items = $cart->items->map(fn($i) => [
             'id' => $i->id,
             'product' => [
@@ -46,13 +42,12 @@ class CheckoutController extends Controller
 
         $total = $items->sum('subtotal');
 
-        
         return Inertia::render('Checkout/Index', [
             'cart' => $items,
             'total' => $total,
         ]);
     }
-   
+
     public function store(Request $request)
     {
         
@@ -69,15 +64,22 @@ class CheckoutController extends Controller
             ]);
         }
 
+        // 🟢 VALIDACIÓN CORREGIDA:
+        // 1. Provincia ('shipping_province') es SIEMPRE requerida.
+        // 2. Dirección ('shipping_address') es requerida SOLO si el método es 'domicilio'.
         $request->validate([
             'payment_method' => 'required|string',
             'paid' => 'required|boolean',
+            'shipping_method' => 'required|in:local,domicilio',
+            'shipping_province' => 'required|string', 
+            // Usa 'nullable' para la base de datos, 'required_if' para la lógica de formulario
+            'shipping_address' => 'nullable|string|required_if:shipping_method,domicilio', 
         ]);
 
         
+        // La tasa de interés se mantiene
         $interestRate = $request->payment_method === 'tarjeta' ? 0.10 : 0;
 
-       
         $items = $cart->items->map(fn($i) => [
             'id' => $i->id,
             'product_id' => $i->product->id,
@@ -89,22 +91,39 @@ class CheckoutController extends Controller
 
         $subtotal = collect($items)->sum('subtotal');
         $interest = $subtotal * $interestRate;
-        $finalTotal = $subtotal + $interest;
+
+        // Costo de envío se mantiene
+        $shippingCost = $request->shipping_method === 'local' ? 20000 : 25000;
+
+        $finalTotal = $subtotal + $interest + $shippingCost;
 
         DB::beginTransaction();
 
         try {
             
+            // 🟢 ASIGNACIÓN DE DIRECCIÓN CORREGIDA:
+            // Forzamos el mensaje por defecto si es 'local'.
+            // Si es 'domicilio', usamos el valor enviado por el usuario (validado como requerido).
+            $shippingAddress = $request->shipping_method === 'local' 
+                ? 'La empresa avisará al usuario la dirección para retirar el envío' 
+                : $request->shipping_address; 
+                
             $order = Order::create([
                 'user_id' => $user->id,
                 'total' => $subtotal,
                 'interest' => $interest,
                 'final_total' => $finalTotal,
                 'payment_method' => $request->payment_method,
-                'paid' => $request->paid,
+                'paid' => false,
+                'shipping_method' => $request->shipping_method,
+                // Provincia siempre se toma del request
+                'shipping_province' => $request->shipping_province,
+                // Usamos la variable con la lógica de defecto/escrita
+                'shipping_address' => $shippingAddress,
+                'shipping_cost' => $shippingCost,
             ]);
 
-           
+            
             foreach ($items as $item) {
                 OrderDetail::create([
                     'order_id' => $order->id,
@@ -116,32 +135,27 @@ class CheckoutController extends Controller
                 ]);
             }
 
-           
+          
             $cart->items()->delete();
             $cart->delete();
 
             DB::commit();
 
-            
-            return redirect()->route('checkout.thanks')
-                             ->with('flash', [
-                                'status' => 'success',
-                                'message' => 'Tu compra fue realizada con éxito.'
-                             ]);
+            return redirect()->route('checkout.thanks')->with('flash', [
+                'status' => 'success',
+                'message' => 'Tu compra fue realizada con éxito.'
+            ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            // Loguear o hacer lo que necesites aquí (opcional)
-            return redirect()->route('checkout.index')
-                             ->with('flash', [
-                                'status' => 'error',
-                                'message' => 'Ocurrió un error al procesar tu compra: ' . $e->getMessage()
-                             ]);
+            return redirect()->route('checkout.index')->with('flash', [
+                'status' => 'error',
+                'message' => 'Ocurrió un error al procesar tu compra: ' . $e->getMessage()
+            ]);
         }
     }
-   
-    
+
     public function thanks()
     {
         return inertia('Checkout/Thanks');

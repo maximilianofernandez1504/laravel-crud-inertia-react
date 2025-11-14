@@ -5,8 +5,8 @@ permissions?: string[];
 }
 }
 export function usePermissions() {
-const {props} = usePage<AuthProps>();
-const permissions = props.auth?.permissions || [];
-const can = (permission: string): boolean => permissions.includes(permission);
-return {can};
+    const {props} = usePage<AuthProps>();
+    const permissions = props.auth?.permissions || [];
+    const can = (permission: string): boolean => permissions.includes(permission);
+    return {can};
 }

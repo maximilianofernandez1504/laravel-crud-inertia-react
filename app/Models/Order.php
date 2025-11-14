@@ -20,6 +20,10 @@ class Order extends Model
         'payment_method',
         'paid',
         'status',
+        'shipping_method',
+        'shipping_address',
+        'shipping_province',
+        'shipping_cost',
     ];
 
     protected $casts = [

@@ -7,29 +7,26 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 
-
 class ProductsExports implements FromCollection, WithHeadings, WithColumnWidths
 {
-    /**
-    * @return \Illuminate\Support\Collection
-    */
     public function headings(): array
     {
         return [
             'ID',
             'Nombre',
-            'Description',
+            'Descripción',
             'Stock',
-            'Precio',
+            'Precio xU',
             'Estado',
             'Creado el',
             'Modificado el',
         ];
     }
+
     public function columnWidths(): array
     {
         return [
-            'A' => 10,
+            'A' => 7,
             'B' => 20,
             'C' => 35,
             'D' => 8,
@@ -39,10 +36,11 @@ class ProductsExports implements FromCollection, WithHeadings, WithColumnWidths
             'H' => 20,
         ];
     }
+
     public function collection()
-    {
-        
-        return Product::select(['id',
+   { 
+    return Product::select([
+        'id',
         'name',
         'description',
         'stock',
@@ -50,6 +48,18 @@ class ProductsExports implements FromCollection, WithHeadings, WithColumnWidths
         'state',
         'created_at',
         'updated_at',
-        ])->get();
+    ])->get()
+    ->map(function ($product) {
+        return [
+            'id' => $product->id,
+            'name' => $product->name,
+            'description' => $product->description,
+            'stock' => $product->stock,
+            'price' => $product->price,
+            'state' => $product->state == 1 ? 'Activo' : 'Desactivado',
+            'created_at' => $product->created_at,
+            'updated_at' => $product->updated_at,
+        ];
+    });
     }
 }

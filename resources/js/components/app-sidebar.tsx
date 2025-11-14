@@ -14,13 +14,13 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Products',
+        title: 'Productos',
         url: '/products',
         icon: PackageSearch
         
     },
     {
-        title: 'Categories',
+        title: 'Categorias',
         url: '/categories',
         icon: Folder
     },
@@ -47,9 +47,25 @@ const mainNavItems: NavItem[] = [
         icon : UsersRound,
     },
     {
+        title:'Historial de Compra',
+        url: '/orders/mis-compras',
+        icon: UsersRound,
+    },
+    {
         title: 'Ordenes',
         url:'/orders',
         icon:LockKeyhole,
+    },
+    {
+        title: 'SobreNosotros',
+        url:'/about-us',
+        icon:LockKeyhole,
+    },
+
+    {
+        title:'Configuración de la pagina',
+        url: '/sitesettings',
+        icon: LockKeyhole,
     },
 ];
 

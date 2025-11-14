@@ -27,23 +27,38 @@ type CheckoutProps = {
 export default function Checkout({ cart, total }: CheckoutProps) {
   const { data, setData, post, processing } = useForm({
     payment_method: "efectivo",
+    shipping_method: "local",
+    shipping_province: "",
+    shipping_address: "",
     paid: false,
   });
 
   const [interest, setInterest] = useState(0);
+  const [shippingCost, setShippingCost] = useState(0);
   const [finalTotal, setFinalTotal] = useState(total);
 
-  // 🔹 Calcular interés si se paga con tarjeta
+  
   useEffect(() => {
-    if (data.payment_method === "tarjeta") {
-      const newInterest = total * 0.1;
-      setInterest(newInterest);
-      setFinalTotal(total + newInterest);
-    } else {
-      setInterest(0);
-      setFinalTotal(total);
+    const newInterest = data.payment_method === "tarjeta" ? total * 0.1 : 0;
+    const newShipping = data.shipping_method === "local" ? 20000 : 25000;
+
+    
+    if (data.shipping_method === "local" && !data.shipping_address) {
+      setData(
+        "shipping_address",
+        "La empresa avisará al usuario la dirección para retirar el envío"
+      );
     }
-  }, [data.payment_method, total]);
+
+    
+    if (data.shipping_method === "domicilio" && data.shipping_address === "La empresa avisará al usuario la dirección para retirar el envío") {
+      setData("shipping_address", "");
+    }
+
+    setInterest(newInterest);
+    setShippingCost(newShipping);
+    setFinalTotal(total + newInterest + newShipping);
+  }, [data.payment_method, data.shipping_method, total]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +78,7 @@ export default function Checkout({ cart, total }: CheckoutProps) {
       <div className="max-w-4xl mx-auto mt-10 text-yellow-200">
         <h1 className="text-3xl font-bold mb-6 text-center">Finalizar compra</h1>
 
-        {/* 🧾 Lista de productos */}
+       
         <Card className="bg-black text-yellow-300 border-yellow-700">
           <CardContent className="p-6">
             {cart.map((item) => (
@@ -74,9 +89,7 @@ export default function Checkout({ cart, total }: CheckoutProps) {
                 <div>
                   <p className="font-semibold">{item.product.name}</p>
                   {item.variant && (
-                    <p className="text-sm opacity-75">
-                      Variante: {item.variant.name}
-                    </p>
+                    <p className="text-sm opacity-75">Variante: {item.variant.name}</p>
                   )}
                   <p className="text-sm opacity-75">
                     {item.quantity} × ${item.product.price}
@@ -100,6 +113,11 @@ export default function Checkout({ cart, total }: CheckoutProps) {
               </div>
             )}
 
+            <div className="flex justify-between mt-2 text-yellow-400">
+              <p>Costo de envío:</p>
+              <p>${shippingCost.toFixed(2)}</p>
+            </div>
+
             <div className="flex justify-between mt-2 font-bold text-yellow-300 text-lg">
               <p>Total final:</p>
               <p>${finalTotal.toFixed(2)}</p>
@@ -107,13 +125,11 @@ export default function Checkout({ cart, total }: CheckoutProps) {
           </CardContent>
         </Card>
 
-        {/* 💳 Formulario */}
+        
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          {/* Selector de medio de pago */}
+          
           <div>
-            <label className="block mb-2 text-sm font-semibold">
-              Método de pago:
-            </label>
+            <label className="block mb-2 text-sm font-semibold">Método de pago:</label>
             <select
               value={data.payment_method}
               onChange={(e) => setData("payment_method", e.target.value)}
@@ -125,21 +141,45 @@ export default function Checkout({ cart, total }: CheckoutProps) {
             </select>
           </div>
 
-          {/* Checkbox de pago */}
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={data.paid}
-              onChange={(e) => setData("paid", e.target.checked)}
-              id="paid"
-              className="accent-yellow-400"
-            />
-            <label htmlFor="paid" className="text-sm">
-              Pagar ahora
-            </label>
+       
+          <div>
+            <label className="block mb-2 text-sm font-semibold">Método de envío:</label>
+            <select
+              value={data.shipping_method}
+              onChange={(e) => setData("shipping_method", e.target.value)}
+              className="bg-black border border-yellow-700 text-yellow-200 rounded-lg px-3 py-2 w-full"
+            >
+              <option value="local">Retiro en local</option>
+              <option value="domicilio">Envío a domicilio</option>
+            </select>
           </div>
 
-          {/* Botones */}
+         
+          <div>
+            <label className="block mb-2 text-sm font-semibold">Provincia:</label>
+            <input
+              type="text"
+              value={data.shipping_province}
+              onChange={(e) => setData("shipping_province", e.target.value)}
+              className="bg-black border border-yellow-700 text-yellow-200 rounded-lg px-3 py-2 w-full"
+            />
+          </div>
+
+         
+          <div>
+            <label className="block mb-2 text-sm font-semibold">Dirección:</label>
+            <input
+              type="text"
+              value={data.shipping_address}
+              onChange={(e) => setData("shipping_address", e.target.value)}
+              placeholder={data.shipping_method === "domicilio" ? "Ingrese su dirección" : ""}
+              readOnly={data.shipping_method === "local"}
+              className={`bg-black border border-yellow-700 text-yellow-200 rounded-lg px-3 py-2 w-full ${
+                data.shipping_method === "local" ? "opacity-70 cursor-not-allowed" : ""
+              }`}
+            />
+          </div>
+
           <div className="flex justify-between mt-8">
             <Button
               type="button"

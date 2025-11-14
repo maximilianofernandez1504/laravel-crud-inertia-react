@@ -4,8 +4,11 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Models\Product;
+use App\Models\SiteSetting;
+
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,7 +17,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        Product::factory(12)->create();
+       //Product::factory(12)->create();
+        $this->call(SiteSettingSeeder::class);
+
         
        /* User::factory()->create([
             'name' => 'Test User',
